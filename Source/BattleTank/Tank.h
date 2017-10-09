@@ -6,6 +6,9 @@
 #include "Components/StaticMeshComponent.h"
 #include "Tank.generated.h"
 
+class UTankAimingComponent;
+class UTankBarrel;
+
 UCLASS()
 class BATTLETANK_API ATank : public APawn
 {
@@ -16,6 +19,12 @@ public:
 	ATank();
 
 protected:
+	UPROPERTY()
+	UTankAimingComponent *TankAimingComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Firing", meta = (BlueprintProtected = "true"))
+	float LaunchSpeed = 100000.0f; // TODO find sensible default
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -23,11 +32,12 @@ protected:
 	void LookUp(float Rate);
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+
+	void AimAt(FVector HitLocation);
 
 private:
 	UPROPERTY()
@@ -38,8 +48,8 @@ private:
 		UStaticMeshComponent *TankRightTrack;
 	UPROPERTY()
 		UStaticMeshComponent *TankTurret;
-	UPROPERTY()
-		UStaticMeshComponent *TankBarrel;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
+		UTankBarrel *TankBarrel;
 	UPROPERTY()
 		class USpringArmComponent *SpringArm;
 	UPROPERTY()

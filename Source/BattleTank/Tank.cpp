@@ -5,6 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/Controller.h"
+#include "TankBarrel.h"
+#include "TankAimingComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 
@@ -12,17 +14,21 @@
 ATank::ATank()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	// Create the static meshes
 	TankBody = CreateDefaultSubobject<UStaticMeshComponent>("TankBody");
 	TankLeftTrack = CreateDefaultSubobject<UStaticMeshComponent>("TankLeftTrack");
 	TankRightTrack = CreateDefaultSubobject<UStaticMeshComponent>("TankRightTrack");
 	TankTurret = CreateDefaultSubobject<UStaticMeshComponent>("TankTurret");
-	TankBarrel = CreateDefaultSubobject<UStaticMeshComponent>("TankBarrel");
+	TankBarrel = CreateDefaultSubobject<UTankBarrel>("TankBarrel");
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
 	AzimuthGimbal = CreateDefaultSubobject<USceneComponent>("AzimuthGimbal");
 	TheCamera = CreateDefaultSubobject<UCameraComponent>("Camera");
+
+	TankAimingComponent = CreateDefaultSubobject<UTankAimingComponent>("Aiming Component");
+	//TankBarrel->RegisterComponent();
+	//AddInstanceComponent(TankBarrel);
 
 	// Find the meshes we are going to use in our content folder
 	auto TankBodyAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Tank/tank_fbx_Body.tank_fbx_Body"));
@@ -58,6 +64,8 @@ ATank::ATank()
 	SpringArm->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 	SpringArm->TargetOffset = FVector(0.0f, 0.0f, 60.0f);
 	SpringArm->bInheritRoll = false;
+
+	TankAimingComponent->SetBarrel(TankBarrel);
 }
 
 // Called when the game starts or when spawned
@@ -65,13 +73,6 @@ void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 	
-}
-
-// Called every frame
-void ATank::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -93,5 +94,10 @@ void ATank::AzimuthTurn(float Rate)
 void ATank::LookUp(float Rate)
 {
 	SpringArm->AddLocalRotation(FRotator(Rate, 0.0f, 0.0f));
+}
+
+void ATank::AimAt(FVector HitLocation)
+{
+	TankAimingComponent->AimAt(HitLocation, LaunchSpeed);
 }
 
