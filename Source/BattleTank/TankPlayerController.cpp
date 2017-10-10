@@ -18,7 +18,7 @@ void ATankPlayerController::BeginPlay()
 		}
 	}
 
-	auto ControlledTank = GetControlledTank();
+	ATank *ControlledTank = GetControlledTank();
 	if (!ControlledTank)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PlayerController not possessing a tank"));
@@ -57,7 +57,7 @@ bool ATankPlayerController::GetSightRayHitLocation(FVector &OutHitLocation) cons
 	// Find the crosshair position in pixel coorinates
 	int32 ViewportSizeX, ViewportSizeY;
 	GetViewportSize(ViewportSizeX, ViewportSizeY);
-	auto ScreenLocation = FVector2D(ViewportSizeX * CrossHairXLocation, ViewportSizeY * CrossHairYLocation);
+	FVector2D ScreenLocation = FVector2D(ViewportSizeX * CrossHairXLocation, ViewportSizeY * CrossHairYLocation);
 
 	// "De-project" the sreen position of the crosshair to a world direction
 	FVector LookDirection;
@@ -75,8 +75,8 @@ bool ATankPlayerController::GetSightRayHitLocation(FVector &OutHitLocation) cons
 bool ATankPlayerController::GetLookVectorHitLocation(FVector LookDirection, FVector &HitLocation) const
 {
 	FHitResult HitResult;
-	auto StartLocation = PlayerCameraManager->GetCameraLocation();
-	auto EndLocation = StartLocation + LookDirection * LineTraceRange;
+	FVector StartLocation = PlayerCameraManager->GetCameraLocation();
+	FVector EndLocation = StartLocation + LookDirection * LineTraceRange;
 	if (GetWorld()->LineTraceSingleByChannel(
 		HitResult,
 		StartLocation,

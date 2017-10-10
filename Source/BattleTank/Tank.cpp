@@ -6,7 +6,10 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/Controller.h"
 #include "TankBarrel.h"
+#include "TankTurret.h"
 #include "TankAimingComponent.h"
+#include "Engine/World.h"
+#include "Projectile.h"
 #include "UObject/ConstructorHelpers.h"
 
 
@@ -20,21 +23,20 @@ ATank::ATank()
 	TankBody = CreateDefaultSubobject<UStaticMeshComponent>("TankBody");
 	TankLeftTrack = CreateDefaultSubobject<UStaticMeshComponent>("TankLeftTrack");
 	TankRightTrack = CreateDefaultSubobject<UStaticMeshComponent>("TankRightTrack");
-	TankTurret = CreateDefaultSubobject<UStaticMeshComponent>("TankTurret");
+	TankTurret = CreateDefaultSubobject<UTankTurret>("TankTurret");
 	TankBarrel = CreateDefaultSubobject<UTankBarrel>("TankBarrel");
+
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
 	AzimuthGimbal = CreateDefaultSubobject<USceneComponent>("AzimuthGimbal");
 	TheCamera = CreateDefaultSubobject<UCameraComponent>("Camera");
 
 	TankAimingComponent = CreateDefaultSubobject<UTankAimingComponent>("Aiming Component");
-	//TankBarrel->RegisterComponent();
-	//AddInstanceComponent(TankBarrel);
 
 	// Find the meshes we are going to use in our content folder
-	auto TankBodyAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Tank/tank_fbx_Body.tank_fbx_Body"));
-	auto TankTrackAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Tank/tank_fbx_Track.tank_fbx_Track"));
-	auto TankTurretAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Tank/tank_fbx_Turret.tank_fbx_Turret"));
-	auto TankBarrelAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("/Game/Tank/tank_fbx_Barrel.tank_fbx_Barrel"));
+	auto TankBodyAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Body.tank_fbx_Body'"));
+	auto TankTrackAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Track.tank_fbx_Track'"));
+	auto TankTurretAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Turret.tank_fbx_Turret'"));
+	auto TankBarrelAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Barrel.tank_fbx_Barrel'"));
 
 	// Set the meshes to our static meshes
 	if (TankBodyAsset.Object) TankBody->SetStaticMesh(TankBodyAsset.Object);
@@ -45,6 +47,8 @@ ATank::ATank()
 	}
 	if (TankTurretAsset.Object) TankTurret->SetStaticMesh(TankTurretAsset.Object);
 	if (TankBarrelAsset.Object) TankBarrel->SetStaticMesh(TankBarrelAsset.Object);
+
+		
 
 	// Put in appropriate heirarchy and attach sockets
 	RootComponent = TankBody;
@@ -66,6 +70,7 @@ ATank::ATank()
 	SpringArm->bInheritRoll = false;
 
 	TankAimingComponent->SetBarrel(TankBarrel);
+	TankAimingComponent->SetTurret(TankTurret);
 }
 
 // Called when the game starts or when spawned
@@ -84,6 +89,9 @@ void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	// Camera movement
 	PlayerInputComponent->BindAxis("AimAzimuth", this, &ATank::AzimuthTurn);
 	PlayerInputComponent->BindAxis("AimElevation", this, &ATank::LookUp);
+
+	// Fire projectile
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATank::Fire);
 }
 
 void ATank::AzimuthTurn(float Rate)
@@ -94,6 +102,23 @@ void ATank::AzimuthTurn(float Rate)
 void ATank::LookUp(float Rate)
 {
 	SpringArm->AddLocalRotation(FRotator(Rate, 0.0f, 0.0f));
+}
+
+void ATank::Fire()
+{
+	bool isReloading = ((FPlatformTime::Seconds() - LastFireTime) > ReloadTime);
+
+	if (TankBarrel && isReloading)
+	{
+		AProjectile *Projectile = GetWorld()->SpawnActor<AProjectile>(
+			ProjectileBlueprint,
+			TankBarrel->GetSocketLocation(FName("FirePoint")),
+			TankBarrel->GetSocketRotation(FName("FirePoint"))
+			);
+
+		Projectile->LaunchProjectile(LaunchSpeed);
+		LastFireTime = FPlatformTime::Seconds();
+	}
 }
 
 void ATank::AimAt(FVector HitLocation)
