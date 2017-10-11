@@ -7,6 +7,8 @@
 #include "GameFramework/Controller.h"
 #include "TankBarrel.h"
 #include "TankTurret.h"
+#include "TankTrack.h"
+#include "TankMovementComponent.h"
 #include "TankAimingComponent.h"
 #include "Engine/World.h"
 #include "Projectile.h"
@@ -21,8 +23,8 @@ ATank::ATank()
 
 	// Create the static meshes
 	TankBody = CreateDefaultSubobject<UStaticMeshComponent>("TankBody");
-	TankLeftTrack = CreateDefaultSubobject<UStaticMeshComponent>("TankLeftTrack");
-	TankRightTrack = CreateDefaultSubobject<UStaticMeshComponent>("TankRightTrack");
+	TankLeftTrack = CreateDefaultSubobject<UTankTrack>("TankLeftTrack");
+	TankRightTrack = CreateDefaultSubobject<UTankTrack>("TankRightTrack");
 	TankTurret = CreateDefaultSubobject<UTankTurret>("TankTurret");
 	TankBarrel = CreateDefaultSubobject<UTankBarrel>("TankBarrel");
 
@@ -31,6 +33,7 @@ ATank::ATank()
 	TheCamera = CreateDefaultSubobject<UCameraComponent>("Camera");
 
 	TankAimingComponent = CreateDefaultSubobject<UTankAimingComponent>("Aiming Component");
+	TankMovementComponent = CreateDefaultSubobject<UTankMovementComponent>("Movement Componenet");
 
 	// Find the meshes we are going to use in our content folder
 	auto TankBodyAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Body.tank_fbx_Body'"));
@@ -68,9 +71,15 @@ ATank::ATank()
 	SpringArm->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 	SpringArm->TargetOffset = FVector(0.0f, 0.0f, 60.0f);
 	SpringArm->bInheritRoll = false;
+	TankBody->SetEnableGravity(true);
+	TankLeftTrack->SetEnableGravity(false);
+	TankRightTrack->SetEnableGravity(false);
+	TankTurret->SetEnableGravity(false);
+	TankBarrel->SetEnableGravity(false);
 
 	TankAimingComponent->SetBarrel(TankBarrel);
 	TankAimingComponent->SetTurret(TankTurret);
+	TankMovementComponent->Initialize(TankLeftTrack, TankRightTrack);
 }
 
 // Called when the game starts or when spawned
@@ -86,9 +95,13 @@ void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	check(PlayerInputComponent);
-	// Camera movement
+	// Movement
 	PlayerInputComponent->BindAxis("AimAzimuth", this, &ATank::AzimuthTurn);
 	PlayerInputComponent->BindAxis("AimElevation", this, &ATank::LookUp);
+	PlayerInputComponent->BindAxis("LeftTrackThrottle", this, &ATank::SetLeftThrottle);
+	PlayerInputComponent->BindAxis("RightTrackThrottle", this, &ATank::SetRightThrottle);
+	PlayerInputComponent->BindAxis("MoveForward", this, &ATank::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &ATank::MoveRight);
 
 	// Fire projectile
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATank::Fire);
@@ -102,6 +115,26 @@ void ATank::AzimuthTurn(float Rate)
 void ATank::LookUp(float Rate)
 {
 	SpringArm->AddLocalRotation(FRotator(Rate, 0.0f, 0.0f));
+}
+
+void ATank::SetLeftThrottle(float Throttle)
+{
+	TankLeftTrack->SetThrottle(Throttle);
+}
+
+void ATank::SetRightThrottle(float Throttle)
+{
+	TankRightTrack->SetThrottle(Throttle);
+}
+
+void ATank::MoveForward(float Value)
+{
+	TankMovementComponent->IntendMoveForward(Value);
+}
+
+void ATank::MoveRight(float Value)
+{
+	TankMovementComponent->IntendMoveRight(Value);
 }
 
 void ATank::Fire()

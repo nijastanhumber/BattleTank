@@ -9,7 +9,9 @@
 class UTankAimingComponent;
 class UTankBarrel;
 class UTankTurret;
+class UTankTrack;
 class AProjectile;
+class UTankMovementComponent;
 
 UCLASS()
 class BATTLETANK_API ATank : public APawn
@@ -23,9 +25,6 @@ public:
 	void Fire();
 
 protected:
-	UPROPERTY()
-	UTankAimingComponent *TankAimingComponent;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup", meta = (BlueprintProtected = "true"))
 		TSubclassOf<AProjectile> ProjectileBlueprint;
 
@@ -37,6 +36,10 @@ protected:
 
 	void AzimuthTurn(float Rate);
 	void LookUp(float Rate);
+	void SetLeftThrottle(float Throttle);
+	void SetRightThrottle(float Throttle);
+	void MoveForward(float Value);
+	void MoveRight(float Value);
 
 public:	
 	// Called to bind functionality to input
@@ -46,12 +49,12 @@ public:
 	void AimAt(FVector HitLocation);
 
 private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent *TankBody;
-	UPROPERTY()
-		UStaticMeshComponent *TankLeftTrack;
-	UPROPERTY()
-		UStaticMeshComponent *TankRightTrack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
+		UTankTrack *TankLeftTrack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
+		UTankTrack *TankRightTrack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UTankTurret *TankTurret;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
@@ -62,6 +65,10 @@ private:
 		USceneComponent *AzimuthGimbal;
 	UPROPERTY()
 		class UCameraComponent *TheCamera;
+	UPROPERTY()
+		UTankAimingComponent *TankAimingComponent;
+	UPROPERTY()
+		UTankMovementComponent *TankMovementComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
 	float ReloadTime = 3.0f;
