@@ -36,8 +36,6 @@ protected:
 
 	void AzimuthTurn(float Rate);
 	void LookUp(float Rate);
-	void SetLeftThrottle(float Throttle);
-	void SetRightThrottle(float Throttle);
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
@@ -65,9 +63,9 @@ private:
 		USceneComponent *AzimuthGimbal;
 	UPROPERTY()
 		class UCameraComponent *TheCamera;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UTankAimingComponent *TankAimingComponent;
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UTankMovementComponent *TankMovementComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))

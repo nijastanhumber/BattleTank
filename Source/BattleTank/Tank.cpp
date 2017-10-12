@@ -77,8 +77,7 @@ ATank::ATank()
 	TankTurret->SetEnableGravity(false);
 	TankBarrel->SetEnableGravity(false);
 
-	TankAimingComponent->SetBarrel(TankBarrel);
-	TankAimingComponent->SetTurret(TankTurret);
+	TankAimingComponent->Initialize(TankBarrel, TankTurret);
 	TankMovementComponent->Initialize(TankLeftTrack, TankRightTrack);
 }
 
@@ -98,8 +97,6 @@ void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	// Movement
 	PlayerInputComponent->BindAxis("AimAzimuth", this, &ATank::AzimuthTurn);
 	PlayerInputComponent->BindAxis("AimElevation", this, &ATank::LookUp);
-	PlayerInputComponent->BindAxis("LeftTrackThrottle", this, &ATank::SetLeftThrottle);
-	PlayerInputComponent->BindAxis("RightTrackThrottle", this, &ATank::SetRightThrottle);
 	PlayerInputComponent->BindAxis("MoveForward", this, &ATank::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATank::MoveRight);
 
@@ -117,16 +114,6 @@ void ATank::LookUp(float Rate)
 	SpringArm->AddLocalRotation(FRotator(Rate, 0.0f, 0.0f));
 }
 
-void ATank::SetLeftThrottle(float Throttle)
-{
-	TankLeftTrack->SetThrottle(Throttle);
-}
-
-void ATank::SetRightThrottle(float Throttle)
-{
-	TankRightTrack->SetThrottle(Throttle);
-}
-
 void ATank::MoveForward(float Value)
 {
 	TankMovementComponent->IntendMoveForward(Value);
@@ -139,9 +126,10 @@ void ATank::MoveRight(float Value)
 
 void ATank::Fire()
 {
+	if (!ensure(TankBarrel)) { return; }
 	bool isReloading = ((FPlatformTime::Seconds() - LastFireTime) > ReloadTime);
 
-	if (TankBarrel && isReloading)
+	if (isReloading)
 	{
 		AProjectile *Projectile = GetWorld()->SpawnActor<AProjectile>(
 			ProjectileBlueprint,
@@ -156,6 +144,7 @@ void ATank::Fire()
 
 void ATank::AimAt(FVector HitLocation)
 {
+	if (!ensure(TankAimingComponent)) { return; }
 	TankAimingComponent->AimAt(HitLocation, LaunchSpeed);
 }
 

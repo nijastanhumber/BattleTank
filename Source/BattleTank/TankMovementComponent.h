@@ -18,7 +18,11 @@ public:
 	void Initialize(UTankTrack *LeftTrackToSet, UTankTrack *RightTrackToSet);
 	void IntendMoveForward(float Throw);
 	void IntendMoveRight(float Throw);
-	
+
+protected:
+	// TODO check best protection
+	virtual void RequestDirectMove(const FVector &MoveVelocity, bool bForceMaxSpeed) override;
+
 private:
 	UPROPERTY()
 	UTankTrack *LeftTrack;
