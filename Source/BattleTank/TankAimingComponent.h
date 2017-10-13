@@ -16,6 +16,7 @@ enum class EFiringState : uint8
 
 class UTankBarrel;
 class UTankTurret;
+class AProjectile;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BATTLETANK_API UTankAimingComponent : public UActorComponent
 {
@@ -31,14 +32,22 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UPROPERTY(BlueprintReadOnly, Category = "State")
-		EFiringState FiringState = EFiringState::Aiming;
-
-public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void AimAt(FVector HitLocation, float LaunchSpeed);
+	UPROPERTY(BlueprintReadOnly, Category = "State")
+		EFiringState FiringState = EFiringState::Reloading;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup", meta = (BlueprintProtected = "true"))
+		TSubclassOf<AProjectile> ProjectileBlueprint;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Firing", meta = (BlueprintProtected = "true"))
+		float LaunchSpeed = 4000.0f;
+
+public:	
+	void AimAt(FVector HitLocation);
+
+	void Fire();
 	
 private:
 	UPROPERTY()
@@ -46,5 +55,15 @@ private:
 	UPROPERTY()
 		UTankTurret *Turret;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
+		float ReloadTime = 3.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
+		double LastFireTime = 0.0f;
+
+	UPROPERTY()
+		FVector AimDirection;
+
 	void MoveBarrelTowards(FVector AimDirection);
+	bool IsBarrelMoving();
 };

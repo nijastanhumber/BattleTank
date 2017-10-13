@@ -19,6 +19,10 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (BlueprintProtected = "true"))
-		float TrackMaxDrivingForce = 400000.0f;
-		
+		float TrackMaxDrivingForce = 40000000.0f;
+
+private:
+	UTankTrack();
+
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 };

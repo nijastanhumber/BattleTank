@@ -10,7 +10,6 @@ class UTankAimingComponent;
 class UTankBarrel;
 class UTankTurret;
 class UTankTrack;
-class AProjectile;
 class UTankMovementComponent;
 
 UCLASS()
@@ -21,15 +20,9 @@ class BATTLETANK_API ATank : public APawn
 public:
 	// Sets default values for this pawn's properties
 	ATank();
-
 	void Fire();
-
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup", meta = (BlueprintProtected = "true"))
-		TSubclassOf<AProjectile> ProjectileBlueprint;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Firing", meta = (BlueprintProtected = "true"))
-	float LaunchSpeed = 4000.0f;
+	
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -63,14 +56,8 @@ private:
 		USceneComponent *AzimuthGimbal;
 	UPROPERTY()
 		class UCameraComponent *TheCamera;
-	UPROPERTY(BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UTankAimingComponent *TankAimingComponent;
 	UPROPERTY(BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UTankMovementComponent *TankMovementComponent;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
-	float ReloadTime = 3.0f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
-	double LastFireTime = 0.0f;
 };

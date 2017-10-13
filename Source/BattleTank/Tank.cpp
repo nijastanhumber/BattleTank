@@ -11,7 +11,6 @@
 #include "TankMovementComponent.h"
 #include "TankAimingComponent.h"
 #include "Engine/World.h"
-#include "Projectile.h"
 #include "UObject/ConstructorHelpers.h"
 
 
@@ -36,20 +35,20 @@ ATank::ATank()
 	TankMovementComponent = CreateDefaultSubobject<UTankMovementComponent>("Movement Componenet");
 
 	// Find the meshes we are going to use in our content folder
-	auto TankBodyAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Body.tank_fbx_Body'"));
-	auto TankTrackAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Track.tank_fbx_Track'"));
-	auto TankTurretAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Turret.tank_fbx_Turret'"));
-	auto TankBarrelAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Barrel.tank_fbx_Barrel'"));
+	//auto TankBodyAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Body.tank_fbx_Body'"));
+	//auto TankTrackAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Track.tank_fbx_Track'"));
+	//auto TankTurretAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Turret.tank_fbx_Turret'"));
+	//auto TankBarrelAsset = ConstructorHelpers::FObjectFinder<UStaticMesh>(TEXT("StaticMesh'/Game/Tank/tank_fbx_Barrel.tank_fbx_Barrel'"));
 
 	// Set the meshes to our static meshes
-	if (TankBodyAsset.Object) TankBody->SetStaticMesh(TankBodyAsset.Object);
-	if (TankTrackAsset.Object)
-	{
-		TankLeftTrack->SetStaticMesh(TankTrackAsset.Object);
-		TankRightTrack->SetStaticMesh(TankTrackAsset.Object);
-	}
-	if (TankTurretAsset.Object) TankTurret->SetStaticMesh(TankTurretAsset.Object);
-	if (TankBarrelAsset.Object) TankBarrel->SetStaticMesh(TankBarrelAsset.Object);
+	//if (TankBodyAsset.Object) TankBody->SetStaticMesh(TankBodyAsset.Object);
+	//if (TankTrackAsset.Object)
+	//{
+	//	TankLeftTrack->SetStaticMesh(TankTrackAsset.Object);
+	//	TankRightTrack->SetStaticMesh(TankTrackAsset.Object);
+	//}
+	//if (TankTurretAsset.Object) TankTurret->SetStaticMesh(TankTurretAsset.Object);
+	//if (TankBarrelAsset.Object) TankBarrel->SetStaticMesh(TankBarrelAsset.Object);
 
 		
 
@@ -57,8 +56,11 @@ ATank::ATank()
 	RootComponent = TankBody;
 	TankTurret->SetupAttachment(TankBody, FName(TEXT("Turret")));
 	TankBarrel->SetupAttachment(TankTurret, FName(TEXT("Barrel")));
-	TankLeftTrack->SetupAttachment(TankBody, FName(TEXT("Left Track")));
-	TankRightTrack->SetupAttachment(TankBody, FName(TEXT("Right Track")));
+
+	TankLeftTrack->SetupAttachment(RootComponent);
+	TankRightTrack->SetupAttachment(RootComponent);
+	TankLeftTrack->AttachToComponent(RootComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), FName("LeftTrack"));
+	TankRightTrack->AttachToComponent(RootComponent, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), FName("RightTrack"));
 	AzimuthGimbal->SetupAttachment(TankBody);
 	SpringArm->SetupAttachment(AzimuthGimbal);
 	TheCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
@@ -124,27 +126,13 @@ void ATank::MoveRight(float Value)
 	TankMovementComponent->IntendMoveRight(Value);
 }
 
-void ATank::Fire()
-{
-	if (!ensure(TankBarrel)) { return; }
-	bool isReloading = ((FPlatformTime::Seconds() - LastFireTime) > ReloadTime);
-
-	if (isReloading)
-	{
-		AProjectile *Projectile = GetWorld()->SpawnActor<AProjectile>(
-			ProjectileBlueprint,
-			TankBarrel->GetSocketLocation(FName("FirePoint")),
-			TankBarrel->GetSocketRotation(FName("FirePoint"))
-			);
-
-		Projectile->LaunchProjectile(LaunchSpeed);
-		LastFireTime = FPlatformTime::Seconds();
-	}
-}
-
 void ATank::AimAt(FVector HitLocation)
 {
 	if (!ensure(TankAimingComponent)) { return; }
-	TankAimingComponent->AimAt(HitLocation, LaunchSpeed);
+	TankAimingComponent->AimAt(HitLocation);
 }
 
+void ATank::Fire()
+{
+	TankAimingComponent->Fire();
+}
