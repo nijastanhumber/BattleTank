@@ -21,8 +21,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (BlueprintProtected = "true"))
 		float TrackMaxDrivingForce = 40000000.0f;
 
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+		void OnHit(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit);
+	void DriveTrack();
+	void OnHit_Implementation(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit);
+
 private:
 	UTankTrack();
 
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void ApplySidewaysForce();
+	float CurrentThrottle = 0.0f;
 };

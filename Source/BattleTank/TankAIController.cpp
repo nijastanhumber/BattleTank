@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Tank.h"
 #include "Engine/World.h"
+#include "TankAimingComponent.h"
 // Depends on movement component via pathfinding system
 
 void ATankAIController::BeginPlay()
@@ -28,7 +29,9 @@ void ATankAIController::Tick(float DeltaTime)
 	ControlledTank->AimAt(PlayerTank->GetActorLocation());
 
 	// Fire if ready
-	ControlledTank->Fire();
+	UTankAimingComponent *AimingComponent = ControlledTank->FindComponentByClass<UTankAimingComponent>();
+	if (AimingComponent->GetFiringState() == EFiringState::Locked)
+		ControlledTank->Fire();
 }
 
 

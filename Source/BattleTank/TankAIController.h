@@ -20,7 +20,7 @@ protected:
 
 private:
 	// How close can the AI tank get
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup", meta = (AllowPrivateAccess = "true"))
-	float AcceptanceRadius = 3000.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
+	float AcceptanceRadius = 8000.0f;
 
 };
