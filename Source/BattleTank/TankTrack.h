@@ -25,8 +25,9 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Collision", meta = (AllowPrivateAccess = "true"))
 		void OnHit(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit);
-	void DriveTrack();
 	void OnHit_Implementation(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit);
+
+	void DriveTrack();
 
 private:
 	UTankTrack();

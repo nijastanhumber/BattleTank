@@ -81,6 +81,8 @@ ATank::ATank()
 
 	TankAimingComponent->Initialize(TankBarrel, TankTurret);
 	TankMovementComponent->Initialize(TankLeftTrack, TankRightTrack);
+
+	CurrentHealth = StartingHealth;
 }
 
 // Called when the game starts or when spawned
@@ -135,4 +137,16 @@ void ATank::AimAt(FVector HitLocation)
 void ATank::Fire()
 {
 	TankAimingComponent->Fire();
+}
+
+float ATank::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser)
+{
+	int32 DamagePoints = FPlatformMath::RoundToInt(DamageAmount);
+	int32 DamageToApply = FMath::Clamp(DamagePoints, 0, CurrentHealth);
+
+	CurrentHealth -= DamageToApply;
+	if (CurrentHealth <= 0.0f)
+		UE_LOG(LogTemp, Warning, TEXT("Tank Died"));
+
+	return DamageToApply;
 }

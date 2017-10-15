@@ -9,7 +9,7 @@
 class UProjectileMovementComponent;
 class UParticleSystemComponent;
 class UStaticMeshComponent;
-
+class URadialForceComponent;
 
 UCLASS()
 class BATTLETANK_API AProjectile : public AActor
@@ -24,14 +24,29 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY()
+	UFUNCTION(BlueprintNativeEvent, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+		void OnHit(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit);
+	void OnHit_Implementation(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit);
+
+	void OnTimerExpire();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		UProjectileMovementComponent *ProjectileMovement;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent *CollisionMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		UParticleSystemComponent *LaunchBlast;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+		UParticleSystemComponent *ImpactBlast;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+		URadialForceComponent *ExplosionForce;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		float DestroyDelay = 10.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		float ProjectileDamage = 20.0f;
 
 public:	
 	// Called every frame

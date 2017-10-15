@@ -39,6 +39,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	void AimAt(FVector HitLocation);
 
+	// Called by the engine when actor damage is dealt
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser) override;
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent *TankBody;
@@ -60,4 +63,9 @@ private:
 		UTankAimingComponent *TankAimingComponent;
 	UPROPERTY(BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UTankMovementComponent *TankMovementComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		int32 StartingHealth = 100.0f;
+	UPROPERTY(VisibleAnywhere, Category = "Health")
+		int32 CurrentHealth;
 };
