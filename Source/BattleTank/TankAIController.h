@@ -16,11 +16,17 @@ class BATTLETANK_API ATankAIController : public AAIController
 	
 protected:	
 	virtual void BeginPlay() override;
+
+	virtual void SetPawn(APawn *InPawn) override;
+
 	virtual void Tick(float DeltaTime) override;
 
 private:
 	// How close can the AI tank get
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
 	float AcceptanceRadius = 8000.0f;
+
+	UFUNCTION()
+		void OnTankDeath();
 
 };

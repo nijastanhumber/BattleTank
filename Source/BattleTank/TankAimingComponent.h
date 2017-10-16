@@ -71,7 +71,7 @@ private:
 		FVector AimDirection;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
-	int32 RoundsLeft = 3;
+	int32 RoundsLeft = 20;
 
 	void MoveBarrelTowards(FVector AimDirection);
 	bool IsBarrelMoving();

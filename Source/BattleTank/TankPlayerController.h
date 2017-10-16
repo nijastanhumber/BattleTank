@@ -18,6 +18,9 @@ class BATTLETANK_API ATankPlayerController : public APlayerController
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+		void OnTankDeath();
+
 protected:
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	ATank* GetControlledTank() const;
@@ -26,6 +29,8 @@ protected:
 	void FoundAimingComponent(UTankAimingComponent *AimCompRef);
 
 	virtual void BeginPlay() override;
+
+	virtual void SetPawn(APawn *InPawn) override;
 
 //	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tank", meta = (BlueprintProtected = "true"))
 //	TSubclassOf<UUserWidget> HUDWidgetClass;

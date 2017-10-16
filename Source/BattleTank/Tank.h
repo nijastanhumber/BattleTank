@@ -12,6 +12,7 @@ class UTankTurret;
 class UTankTrack;
 class UTankMovementComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTankDelegate);
 UCLASS()
 class BATTLETANK_API ATank : public APawn
 {
@@ -21,6 +22,9 @@ public:
 	// Sets default values for this pawn's properties
 	ATank();
 	void Fire();
+
+	FTankDelegate OnDeath;
+
 protected:
 	
 
@@ -32,6 +36,8 @@ protected:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
+	void Swap();
+
 public:	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -41,6 +47,9 @@ public:
 
 	// Called by the engine when actor damage is dealt
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser) override;
+
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetHealthPercent() const;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
@@ -59,6 +68,8 @@ private:
 		USceneComponent *AzimuthGimbal;
 	UPROPERTY()
 		class UCameraComponent *TheCamera;
+	UPROPERTY()
+		UCameraComponent *SecondCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))
 		UTankAimingComponent *TankAimingComponent;
 	UPROPERTY(BlueprintReadOnly, Category = "TankParts", meta = (AllowPrivateAccess = "true"))

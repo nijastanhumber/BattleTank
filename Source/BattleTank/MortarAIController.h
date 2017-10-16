@@ -19,7 +19,13 @@ class BATTLETANK_API AMortarAIController : public AAIController
 	
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void SetPawn(APawn *InPawn) override;
+
 	virtual void Tick(float DeltaTime) override;
 	
+private:
+	UFUNCTION()
+		void OnTankDeath();
 	
 };

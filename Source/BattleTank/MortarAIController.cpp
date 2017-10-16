@@ -13,6 +13,19 @@ void AMortarAIController::BeginPlay()
 
 }
 
+void AMortarAIController::SetPawn(APawn *InPawn)
+{
+	Super::SetPawn(InPawn);
+	if (InPawn)
+	{
+		ATank *PossessedTank = Cast<ATank>(InPawn);
+		if (!ensure(PossessedTank)) { return; }
+
+		// Subscribe our local method to the tank's death event
+		PossessedTank->OnDeath.AddUniqueDynamic(this, &AMortarAIController::OnTankDeath);
+	}
+}
+
 void AMortarAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -29,6 +42,14 @@ void AMortarAIController::Tick(float DeltaTime)
 	UTankAimingComponent *AimingComponent = ControlledTank->FindComponentByClass<UTankAimingComponent>();
 	//if (AimingComponent->GetFiringState() == EFiringState::Locked)
 		ControlledTank->Fire();
+}
+
+void AMortarAIController::OnTankDeath()
+{
+	if (!GetPawn()) { return; }
+	{
+		GetPawn()->DetachFromControllerPendingDestroy();
+	}
 }
 
 

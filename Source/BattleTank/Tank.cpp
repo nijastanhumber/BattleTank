@@ -29,7 +29,8 @@ ATank::ATank()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
 	AzimuthGimbal = CreateDefaultSubobject<USceneComponent>("AzimuthGimbal");
-	TheCamera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	TheCamera = CreateDefaultSubobject<UCameraComponent>("TheCamera");
+	SecondCamera = CreateDefaultSubobject<UCameraComponent>("SecondCamera");
 
 	TankAimingComponent = CreateDefaultSubobject<UTankAimingComponent>("Aiming Component");
 	TankMovementComponent = CreateDefaultSubobject<UTankMovementComponent>("Movement Componenet");
@@ -64,6 +65,7 @@ ATank::ATank()
 	AzimuthGimbal->SetupAttachment(TankBody);
 	SpringArm->SetupAttachment(AzimuthGimbal);
 	TheCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
+	SecondCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
 	// Put in proper positions and set parameters
 	TankBody->SetSimulatePhysics(true);
@@ -73,6 +75,9 @@ ATank::ATank()
 	SpringArm->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 	SpringArm->TargetOffset = FVector(0.0f, 0.0f, 60.0f);
 	SpringArm->bInheritRoll = false;
+	SecondCamera->SetRelativeLocation(FVector(1067.0f, 0.0f, 147.0f));
+	SecondCamera->SetRelativeRotation(FRotator(20.0f, 0.0f, 0.0f));
+	SecondCamera->bAutoActivate = false;
 	TankBody->SetEnableGravity(true);
 	TankLeftTrack->SetEnableGravity(false);
 	TankRightTrack->SetEnableGravity(false);
@@ -81,15 +86,13 @@ ATank::ATank()
 
 	TankAimingComponent->Initialize(TankBarrel, TankTurret);
 	TankMovementComponent->Initialize(TankLeftTrack, TankRightTrack);
-
-	CurrentHealth = StartingHealth;
 }
 
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	CurrentHealth = StartingHealth;
 }
 
 // Called to bind functionality to input
@@ -106,6 +109,8 @@ void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	// Fire projectile
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATank::Fire);
+	// Quit is in the level blueprint
+	PlayerInputComponent->BindAction("SwapCam", IE_Pressed, this, &ATank::Swap);
 }
 
 void ATank::AzimuthTurn(float Rate)
@@ -139,6 +144,13 @@ void ATank::Fire()
 	TankAimingComponent->Fire();
 }
 
+void ATank::Swap()
+{
+	if ((!TheCamera) || (!SecondCamera)) { return; }
+	TheCamera->ToggleActive();
+	SecondCamera->ToggleActive();
+}
+
 float ATank::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser)
 {
 	int32 DamagePoints = FPlatformMath::RoundToInt(DamageAmount);
@@ -146,7 +158,14 @@ float ATank::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEv
 
 	CurrentHealth -= DamageToApply;
 	if (CurrentHealth <= 0.0f)
-		UE_LOG(LogTemp, Warning, TEXT("Tank Died"));
+	{
+		OnDeath.Broadcast();
+	}
 
 	return DamageToApply;
+}
+
+float ATank::GetHealthPercent() const
+{
+	return (float)CurrentHealth / (float)StartingHealth;
 }
